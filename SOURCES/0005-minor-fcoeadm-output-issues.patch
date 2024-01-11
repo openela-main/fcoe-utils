@@ -1,0 +1,35 @@
+From c4fe62dd3d26b30fdcf94c94f74bc0b9f7034c17 Mon Sep 17 00:00:00 2001
+From: Chris Leech <cleech@redhat.com>
+Date: Wed, 24 Mar 2021 10:17:52 -0700
+Subject: [PATCH 5/5] minor fcoeadm output issues
+
+Signed-off-by: Chris Leech <cleech@redhat.com>
+---
+ fcoeadm_display.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/fcoeadm_display.c b/fcoeadm_display.c
+index 585ecfae54e..c2ef33b82cf 100644
+--- a/fcoeadm_display.c
++++ b/fcoeadm_display.c
+@@ -132,7 +132,7 @@ static void show_port_info(struct port_attributes *lp_info)
+ 	printf("        Port Name:         %s\n",
+ 		lp_info->port_name);
+ 
+-	printf("        Fabric Name:        %s\n",
++	printf("        Fabric Name:       %s\n",
+ 		lp_info->fabric_name);
+ 
+ 	printf("        Speed:             %s\n",
+@@ -853,7 +853,7 @@ static void print_fcoe_fcf_device(void *ep, UNUSED void *arg)
+ 		buf = temp;
+ 	printf("        Connection Mode:  %s\n", buf);
+ 	printf("        Fabric Name:      0x%016" PRIx64 "\n", fcf->fabric_name);
+-	printf("        Switch Name       0x%016" PRIx64 "\n", fcf->switch_name);
++	printf("        Switch Name:      0x%016" PRIx64 "\n", fcf->switch_name);
+ 	mac2str(fcf->mac, mac, MAX_STR_LEN);
+ 	printf("        MAC Address:      %s\n", mac);
+ 	printf("        FCF Priority:     %u\n", fcf->priority);
+-- 
+2.26.2
+

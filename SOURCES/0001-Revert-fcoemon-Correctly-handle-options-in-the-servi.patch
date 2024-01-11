@@ -1,0 +1,115 @@
+From 729135eea0ed39b3dfd57b7ea15f284e67af532f Mon Sep 17 00:00:00 2001
+From: Chris Leech <cleech@redhat.com>
+Date: Mon, 18 Jan 2021 13:37:39 -0800
+Subject: [PATCH 1/1] Revert "fcoemon: Correctly handle options in the service
+ file"
+
+This reverts commit b06c3df0f0b06c1ad37b3bbf8bd602b24318aae6.
+---
+ doc/fcoemon.txt          |  6 +++---
+ etc/systemd/fcoe.service |  4 ++--
+ fcoemon.c                | 24 +++++++++---------------
+ 3 files changed, 14 insertions(+), 20 deletions(-)
+
+diff --git a/doc/fcoemon.txt b/doc/fcoemon.txt
+index ba70478d141..3bfb3581a1b 100644
+--- a/doc/fcoemon.txt
++++ b/doc/fcoemon.txt
+@@ -53,13 +53,13 @@ OPTIONS
+ -------
+ *-f*, *--foreground*::
+ 	Run *fcoemon* in the foreground.
+-*-d*, *--debug=yes|no*::
+-	Enable or disable debugging messages.
++*-d*, *--debug*::
++	Enable debugging messages.
+ *-l*, *--legacy*::
+ 	Force fcoemon to use the legacy /sys/module/libfcoe/parameters/
+ 	interface. The default is to use the newer /sys/bus/fcoe/ interfaces
+ 	if they are available.
+-*-s*, *--syslog=yes|no*::
++*-s*, *--syslog*::
+ 	Use syslogd for logging. The default behavior is to log to stdout
+ 	and stderr.
+ *-h*, *--help*::
+diff --git a/etc/systemd/fcoe.service b/etc/systemd/fcoe.service
+index b1d95671573..5e5c8a2b67b 100644
+--- a/etc/systemd/fcoe.service
++++ b/etc/systemd/fcoe.service
+@@ -4,9 +4,9 @@ After=syslog.target network.target
+ 
+ [Service]
+ Type=simple
+-EnvironmentFile=/etc/fcoe/config
++EnvironmentFile=/etc/sysconfig/fcoe
+ ExecStartPre=/sbin/modprobe -qa $SUPPORTED_DRIVERS
+-ExecStart=/usr/sbin/fcoemon --foreground --debug=$DEBUG --syslog=$SYSLOG
++ExecStart=/usr/sbin/fcoemon $FCOEMON_OPTS
+ 
+ [Install]
+ WantedBy=multi-user.target
+diff --git a/fcoemon.c b/fcoemon.c
+index 8c08bc5a032..0cc36fec304 100644
+--- a/fcoemon.c
++++ b/fcoemon.c
+@@ -335,9 +335,9 @@ static int fcoe_vid_from_ifname(const char *ifname);
+  * Table for getopt_long(3).
+  */
+ static struct option fcm_options[] = {
+-	{"debug", 1, NULL, 'd'},
++	{"debug", 0, NULL, 'd'},
+ 	{"legacy", 0, NULL, 'l'},
+-	{"syslog", 1, NULL, 's'},
++	{"syslog", 0, NULL, 's'},
+ 	{"exec", 1, NULL, 'e'},
+ 	{"foreground", 0, NULL, 'f'},
+ 	{"version", 0, NULL, 'v'},
+@@ -3271,9 +3271,9 @@ static void fcm_usage(void)
+ {
+ 	printf("Usage: %s\n"
+ 	       "\t [-f|--foreground]\n"
+-	       "\t [-d|--debug=yes|no]\n"
++	       "\t [-d|--debug]\n"
+ 	       "\t [-l|--legacy]\n"
+-	       "\t [-s|--syslog=yes|no]\n"
++	       "\t [-s|--syslog]\n"
+ 	       "\t [-v|--version]\n"
+ 	       "\t [-h|--help]\n\n", progname);
+ 	exit(1);
+@@ -3729,28 +3729,22 @@ int main(int argc, char **argv)
+ 	sa_log_flags = 0;
+ 	openlog(sa_log_prefix, LOG_CONS, LOG_DAEMON);
+ 
+-	while ((c = getopt_long(argc, argv, "fd:hls:v",
++	while ((c = getopt_long(argc, argv, "fdhlsv",
+ 				fcm_options, NULL)) != -1) {
+ 		switch (c) {
+ 		case 'f':
+ 			fcm_fg = 1;
+ 			break;
+ 		case 'd':
+-			if (!strncmp(optarg, "yes", 3) ||
+-			    !strncmp(optarg, "YES", 3)) {
+-				fcoe_config.debug = 1;
+-				enable_debug_log(1);
+-			}
++			fcoe_config.debug = 1;
++			enable_debug_log(1);
+ 			break;
+ 		case 'l':
+ 			force_legacy = true;
+ 			break;
+ 		case 's':
+-			if (!strncmp(optarg, "yes", 3) ||
+-			    !strncmp(optarg, "YES", 3)) {
+-				fcoe_config.use_syslog = 1;
+-				enable_syslog(1);
+-			}
++			fcoe_config.use_syslog = 1;
++			enable_syslog(1);
+ 			break;
+ 		case 'v':
+ 			printf("%s\n", FCOE_UTILS_VERSION);
+-- 
+2.26.2
+

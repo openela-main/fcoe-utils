@@ -1,0 +1,25 @@
+From db650524cb395827cf0d5a43bd07f77396513cd7 Mon Sep 17 00:00:00 2001
+From: rpm-build <rpm-build>
+Date: Tue, 7 Aug 2018 21:23:38 -0700
+Subject: [PATCH 1/1] set default DCB_REQUIRED to 'no'
+
+---
+ etc/cfg-ethx | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/etc/cfg-ethx b/etc/cfg-ethx
+index c5aaf36b4625..e2eb3309ccc7 100644
+--- a/etc/cfg-ethx
++++ b/etc/cfg-ethx
+@@ -8,7 +8,7 @@ FCOE_ENABLE="yes"
+ ## Default:    no
+ # Indicate if DCB service is required at the Ethernet port
+ # Normally set to "yes"
+-DCB_REQUIRED="yes"
++DCB_REQUIRED="no"
+ 
+ ## Type:	yes/no
+ ## Default:	no
+-- 
+2.14.4
+

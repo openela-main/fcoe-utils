@@ -1,0 +1,35 @@
+From 108387a2aa986a8107faa7548f3f9e9c084749d2 Mon Sep 17 00:00:00 2001
+From: Chris Leech <cleech@redhat.com>
+Date: Wed, 24 Mar 2021 09:50:51 -0700
+Subject: [PATCH 4/5] fix regressions caused by safe_makepath change in
+ libopenfcoe.c
+
+This needs to use strlen(dname) not sizeof(dname) or the directory path
+is truncated.  On a 64-bit arch an 8 byte truncation kind of looks like
+a valid path '/sys/bus' which is sort of funny unless you're debugging
+it.
+
+This caused fcoeadm --fcf to fail to read in FCF info, and fcoeadm
+--lesb to fail to find the link error status block counters.
+
+Signed-off-by: Chris Leech <cleech@redhat.com>
+---
+ libopenfcoe.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/libopenfcoe.c b/libopenfcoe.c
+index 452ee803e63..cd35c868eee 100644
+--- a/libopenfcoe.c
++++ b/libopenfcoe.c
+@@ -58,7 +58,7 @@ out_err:
+ static char *safe_makepath(char *path, size_t path_sz,
+ 		char *dname, char *fname)
+ {
+-	size_t dsz = sizeof(dname);
++	size_t dsz = strlen(dname);
+ 	size_t fsz = strlen(fname);
+ 	char *cp = path;
+ 
+-- 
+2.26.2
+
